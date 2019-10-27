@@ -36,7 +36,17 @@ Value ResolveType2(String valueToResolve){
 }	
 
 void Discord_WOW::Help(ValueMap payload){
+		Upp::String message;
 	
+	message = "```\n";
+	mmessage << "!bl Add(Nom du joueur, motif de l'ajout) -> Ajoute un toxic à la black liste. (Réservée aux membres de la guilde)\n\n";
+	message << "!bl Delete(Nom du joueur) -> Supprime un joueur de la liste.(Réservée aux admins)\n\n";
+	message << "!bl Check(Nom du joueur) -> Vérifie si un joueur est toxic.\n\n";
+	message << "!bl CheckD(Nom du joueu) -> Vérifie si un joueur est toxic et renvois ses motifs si il ait.\n\n";
+	message << "!bl credit()" <<" -> Affiche les crédit du module wow blacklist.\n\n";
+	message = message << "```";
+	
+	BotPtr->CreateMessage(this->ChannelLastMessage, message);
 }
 String Discord_WOW::Credit(ValueMap json,bool sendCredit){
 	String credit =  "----World of Warcraft SmartUppBot Module have been made By Clément Hamon---\n";
