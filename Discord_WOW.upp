@@ -1,0 +1,9 @@
+description "\377226,127,0";
+
+file
+	Discord_WOW.h,
+	Discord_WOW.cpp,
+	Discord_WOW.sch,
+	WOW_MemoryCRUD.h,
+	WOW_MemoryCRUD.cpp;
+
