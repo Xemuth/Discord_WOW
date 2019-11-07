@@ -39,7 +39,7 @@ void Discord_WOW::Help(ValueMap payload){
 		Upp::String message;
 	
 	message = "```\n";
-	mmessage << "!bl Add(Nom du joueur, motif de l'ajout) -> Ajoute un toxic à la black liste. (Réservée aux membres de la guilde)\n\n";
+	message << "!bl Add(Nom du joueur, motif de l'ajout) -> Ajoute un toxic à la black liste. (Réservée aux membres de la guilde)\n\n";
 	message << "!bl Delete(Nom du joueur) -> Supprime un joueur de la liste.(Réservée aux admins)\n\n";
 	message << "!bl Check(Nom du joueur) -> Vérifie si un joueur est toxic.\n\n";
 	message << "!bl CheckD(Nom du joueu) -> Vérifie si un joueur est toxic et renvois ses motifs si il ait.\n\n";
@@ -59,7 +59,7 @@ String Discord_WOW::Credit(ValueMap json,bool sendCredit){
 
 Discord_WOW::Discord_WOW(Upp::String _name,Upp::String _prefix){
 	name = _name;
-	prefix = _prefix;
+	AddPrefix(_prefix);
 	
 	prepareOrLoadBDD();
 	LoadMemoryCrud();
