@@ -3,38 +3,13 @@
 #include <Sql/sch_schema.h>
 #include <Sql/sch_source.h>
 
-//checking if string could be a number
-bool isStringisNumber(Upp::String stringNumber){
-	if (std::isdigit(stringNumber[0]) || (stringNumber.GetCount() > 1 && (stringNumber[0] == '+'))){
-        for (int i = 1 ; i < stringNumber.GetCount(); ++i)
-            if (!std::isdigit(stringNumber[i]))
-                return false;
-        return true;
-    }
-    return false;
+void Discord_WOW::PrepareEvent(){
+	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("add"))AddPlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("delete"))RemovePlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("check"))CheckPlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("checkd"))DetailledCheckPlayer(e);});
 }
-//Function to allow inheritance of type from a string
-Value ResolveType2(String valueToResolve){
-    if(valueToResolve.GetCount()> 0 && isStringisNumber(valueToResolve)){
-        if(valueToResolve.GetCount() > 9){
-            return Value(std::stoi(valueToResolve.ToStd()));
-        }else if(valueToResolve.Find(",") || valueToResolve.Find(".")){
-            return Value(std::stoi(valueToResolve.ToStd()));
-        }else{
-            return Value(std::stoi(valueToResolve.ToStd()));
-        }
-    }else if(valueToResolve.GetCount()> 0 && ((valueToResolve[0] == 'b' && isStringisNumber(valueToResolve.Right(valueToResolve.GetCount()-1))) || (ToLower(valueToResolve).IsEqual("true") || ToLower(valueToResolve).IsEqual("false")))  ){
-        if(valueToResolve.Find("b")>-1 && isStringisNumber(valueToResolve.Right(valueToResolve.GetCount()-1)) ){
-            valueToResolve.Replace("b","");
-            return Value(((std::stoi(valueToResolve.ToStd())!=0)? true:false));
-        }else if(valueToResolve.IsEqual("true") || valueToResolve.IsEqual("false")){
-            return Value(((valueToResolve.IsEqual("true"))? true:false));
-        }
-    }
-    return Value(valueToResolve);
-
-}	
-
+	
 void Discord_WOW::Help(ValueMap payload){
 		Upp::String message;
 	
@@ -63,11 +38,7 @@ Discord_WOW::Discord_WOW(Upp::String _name,Upp::String _prefix){
 	
 	prepareOrLoadBDD();
 	LoadMemoryCrud();
-	
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("add"))AddPlayer(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("delete"))RemovePlayer(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("check"))CheckPlayer(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("checkd"))DetailledCheckPlayer(e);});
+	PrepareEvent();
 }
 void Discord_WOW::EventsMessageCreated(ValueMap payload){
 	for(auto &e : EventsMapMessageCreated){

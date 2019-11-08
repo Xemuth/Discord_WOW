@@ -14,16 +14,19 @@ class Discord_WOW: public DiscordModule{
 	private:
 		Sqlite3Session sqlite3; //DataBase
 		bool bddLoaded =false;
+		
+		
+		void PrepareEvent();
 		void prepareOrLoadBDD();
 		void LoadMemoryCrud();
+		
+		
 		
 		Vector<WowPlayer> AllWowPlayers;
 
 		void AddPlayer(ValueMap payload);
-		
 		void CheckPlayer(ValueMap payload);
 		void DetailledCheckPlayer(ValueMap payload);
-		
 		void RemovePlayer(ValueMap payload);
 
 		bool CheckRole(ValueMap checkRole,Vector<String>& roleToCheck);
