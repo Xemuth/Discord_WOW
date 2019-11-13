@@ -11,14 +11,16 @@ void Discord_WOW::PrepareEvent(){
 }
 	
 void Discord_WOW::Help(ValueMap payload){
-		Upp::String message;
+	Upp::String message;
 	
 	message = "```\n";
-	message << "!bl Add(Nom du joueur, motif de l'ajout) -> Ajoute un toxic à la black liste. (Réservée aux membres de la guilde)\n\n";
-	message << "!bl Delete(Nom du joueur) -> Supprime un joueur de la liste.(Réservée aux admins)\n\n";
-	message << "!bl Check(Nom du joueur) -> Vérifie si un joueur est toxic.\n\n";
-	message << "!bl CheckD(Nom du joueu) -> Vérifie si un joueur est toxic et renvois ses motifs si il ait.\n\n";
-	message << "!bl credit()" <<" -> Affiche les crédit du module wow blacklist.\n\n";
+	message << "*******'Ops' veut dire Optionnel. Chaque Argument noté Optionnel n'est pas obligatoire.*******\n\n";
+	message << "!bl Add(Name:Xemuth; Ops->Motif:Est manifestement beaucoup trop fort) -> Ajoute un toxic à la black liste(Réservée aux membres de la guilde). Les Arguments sont 'Name' et 'Motif'\n\n";
+	message << "!bl Delete(Name:Xanf) -> Supprime un joueur de la liste.(Réservée aux admins). Un seul Argument 'Name'\n\n";
+	message << "!bl Check(Name:Arthons) -> Vérifie si un joueur est toxic.\n\n";
+	message << "!bl CheckD(Name:Rugissang) -> Vérifie si un joueur est toxic et renvois ses motifs si il ait.\n\n";
+	message << "!bl Liste -> Affiche la liste de tous les joueurs bannis.(Pas encore active)\n\n";
+	message << "!bl Credit" <<" -> Affiche les crédit du module wow blacklist.\n\n";
 	message = message << "```";
 	
 	BotPtr->CreateMessage(this->ChannelLastMessage, message);
@@ -59,39 +61,42 @@ bool Discord_WOW::CheckRole(ValueMap checkRole,Vector<String>& roleToCheck){
 
 void Discord_WOW::AddPlayer(ValueMap payload){
 	if(CheckRole(payload, AllRoleAllowed)){
-		if(MessageArgs.GetCount() == 2){
-			Value v1 =ResolveType2(MessageArgs[0]);
-			Value v2 =ResolveType2(MessageArgs[1]);
-			if(v1.GetTypeName().IsEqual("String") && v2.GetTypeName().IsEqual("String")){
-				Sql sql(sqlite3);
-				String name = ToLower(v1.ToString());
-				for( WowPlayer& p : AllWowPlayers){
-					if(p.GetPlayerName().IsEqual(name)){
-						if(sql*Insert(WOW_MOTIFS)(WOW_MOTIF,v2.ToString())(WOW_MOTIFS_WOW_PLAYER_RECORDS_ID,p.GetPlayerID())){
-							p.AddMotifs(v2.ToString());
-							BotPtr->CreateMessage(ChannelLastMessage,"Ajout de motif à ce cancer de joueur réussie");
-							return;
-						}else{
-							BotPtr->CreateMessage(ChannelLastMessage,"Erreur d'enregistrement");
-							return;						
-						}
-					}
-				}
-				if(sql*Insert(WOW_PLAYER_RECORDS)(WOW_NAME,name)){
-					WowPlayer& pl = AllWowPlayers.Create(sql.GetInsertedId(),name);
-					if(sql*Insert(WOW_MOTIFS)(WOW_MOTIF,v2.ToString())(WOW_MOTIFS_WOW_PLAYER_RECORDS_ID,pl.GetPlayerID())){
-						pl.AddMotifs(v2.ToString());
-						BotPtr->CreateMessage(ChannelLastMessage,"Enregistrement réussie");
+		String name="";
+		String motif="";
+		if(MessageArgs.Find("name") != -1 &&  MessageArgs.Get("name").GetTypeName().IsEqual("String")) name = MessageArgs.Get("name").ToString();
+		if(MessageArgs.Find("motif") != -1 &&  MessageArgs.Get("motif").GetTypeName().IsEqual("String")) motif = MessageArgs.Get("motif").ToString();
+		if(motif.GetCount() ==0) motif ="Aucun Motif défini";
+		if(name.GetCount() > 0){
+			Sql sql(sqlite3);
+			name = ToLower(name);
+			for( WowPlayer& p : AllWowPlayers){
+				if(p.GetPlayerName().IsEqual(name)){
+					if(sql*Insert(WOW_MOTIFS)(WOW_MOTIF,motif)(WOW_MOTIFS_WOW_PLAYER_RECORDS_ID,p.GetPlayerID())){
+						p.AddMotifs(motif);
+						BotPtr->CreateMessage(ChannelLastMessage,"Ajout de motif à ce cancer de joueur réussie");
 						return;
 					}else{
-						AllWowPlayers.Remove(AllWowPlayers.GetCount()-1,1);
 						BotPtr->CreateMessage(ChannelLastMessage,"Erreur d'enregistrement");
-						return;
+						return;						
 					}
 				}
-				BotPtr->CreateMessage(ChannelLastMessage,"Error Registering");
-				return;
 			}
+			if(sql*Insert(WOW_PLAYER_RECORDS)(WOW_NAME,name)){
+				WowPlayer& pl = AllWowPlayers.Create(sql.GetInsertedId(),name);
+				if(sql*Insert(WOW_MOTIFS)(WOW_MOTIF,motif)(WOW_MOTIFS_WOW_PLAYER_RECORDS_ID,pl.GetPlayerID())){
+					pl.AddMotifs(motif);
+					BotPtr->CreateMessage(ChannelLastMessage,"Enregistrement réussie");
+					return;
+				}else{
+					AllWowPlayers.Remove(AllWowPlayers.GetCount()-1,1);
+					BotPtr->CreateMessage(ChannelLastMessage,"Erreur d'enregistrement");
+					return;
+				}
+			}
+			BotPtr->CreateMessage(ChannelLastMessage,"Error Registering");
+			return;
+		}else{
+			BotPtr->CreateMessage(ChannelLastMessage,"Spécifie moi un nom ! Comme ça : !bl Add(Name: <@!" + AuthorId +">; Motif: A pas compris la commande discord) Tu es pas obligé de mettre un motif");
 		}
 	}else{
 		BotPtr->CreateMessage(ChannelLastMessage,"Vous n'avez pas les droits !");
@@ -100,80 +105,68 @@ void Discord_WOW::AddPlayer(ValueMap payload){
 
 void Discord_WOW::RemovePlayer(ValueMap payload){
 	if(CheckRole(payload, AllRoleAdmin)){
-		if(MessageArgs.GetCount() == 1){
-			Value v1 =ResolveType2(MessageArgs[0]);
-			if(v1.GetTypeName().IsEqual("String")){
-				Sql sql(sqlite3);
-				String name = ToLower(v1.ToString());
-				int cpt = 0;
-				for( WowPlayer& p : AllWowPlayers){
-					if(p.GetPlayerName().IsEqual(name)){
-						if(sql*Delete(WOW_PLAYER_RECORDS).Where(WOW_PLAYER_ID == p.GetPlayerID())){
-							AllWowPlayers.Remove(cpt,1);
-							BotPtr->CreateMessage(ChannelLastMessage,"supression reussite");
-							return;
-						}else{
-							BotPtr->CreateMessage(ChannelLastMessage,"Supression impossible.");
-							return;						
-						}
+		String name="";
+		if(MessageArgs.Find("name") != -1 &&  MessageArgs.Get("name").GetTypeName().IsEqual("String")) name = MessageArgs.Get("name").ToString();
+		if(name.GetCount() >0){
+			Sql sql(sqlite3);
+			name = ToLower(name);
+			int cpt = 0;
+			for( WowPlayer& p : AllWowPlayers){
+				if(p.GetPlayerName().IsEqual(name)){
+					if(sql*Delete(WOW_PLAYER_RECORDS).Where(WOW_PLAYER_ID == p.GetPlayerID())){
+						AllWowPlayers.Remove(cpt,1);
+						BotPtr->CreateMessage(ChannelLastMessage,"Supression reussite !");
+						return;
+					}else{
+						BotPtr->CreateMessage(ChannelLastMessage,"Supression impossible !");
+						return;						
 					}
-					cpt++;
 				}
-			}else{
-				BotPtr->CreateMessage(ChannelLastMessage,"Erreur d'arguments");
+				cpt++;
 			}
+			BotPtr->CreateMessage(ChannelLastMessage,"Je n'ai pas trouvé ce joueur !");
+		}else{
+			BotPtr->CreateMessage(ChannelLastMessage,"Donne moi un nom !  Comme ça  : !bl delete(Name:<@!" + AuthorId +">)");
 		}
 	}else{
-		BotPtr->CreateMessage(ChannelLastMessage,"Vous n'avez pas les droits !");
+		BotPtr->CreateMessage(ChannelLastMessage,"Heyyyyy mais tu es pas Admin la ! je vais te marabouter si tu continues");
 	}
 }
 
-void Discord_WOW::CheckPlayer(ValueMap payload){
-	if(MessageArgs.GetCount() == 1){
-		Value v1 =ResolveType2(MessageArgs[0]);			
-		if(v1.GetTypeName().IsEqual("String")){
-			String name = ToLower(v1.ToString());
-			for(WowPlayer& pl : AllWowPlayers){
-				if(pl.GetPlayerName().IsEqual(name)){
-					BotPtr->CreateMessage(ChannelLastMessage,"Le joueur " + pl.GetPlayerName() + " c'est fait report " + AsString( pl.GetMotifs().GetCount()) +" fois" );
-					return;		
-				}
+void Discord_WOW::CheckPlayer(ValueMap payload){	
+	String name="";
+	if(MessageArgs.Find("name") != -1 &&  MessageArgs.Get("name").GetTypeName().IsEqual("String")) name = MessageArgs.Get("name").ToString();
+	if(name.GetCount()>0){
+		name= ToLower(name);
+		for(WowPlayer& pl : AllWowPlayers){
+			if(pl.GetPlayerName().IsEqual(name)){
+				BotPtr->CreateMessage(ChannelLastMessage,"Le joueur " + pl.GetPlayerName() + " c'est fait report " + AsString( pl.GetMotifs().GetCount()) +" fois" );
+				return;		
 			}
-			BotPtr->CreateMessage(ChannelLastMessage,"Ce joueur n'est pas un cancer" );
-			return;
-		}else{
-			BotPtr->CreateMessage(ChannelLastMessage,"Erreurs d'arguments" );	
 		}
+		BotPtr->CreateMessage(ChannelLastMessage,"Ce joueur n'est pas un cancer" );
+		return;
 	}else{
-		BotPtr->CreateMessage(ChannelLastMessage,"Erreurs d'arguments" );	
+		BotPtr->CreateMessage(ChannelLastMessage,"Donne moi un nom !  Comme ça  : !bl Check(Name:<@!" + AuthorId +">)");	
 	}
 }
 void Discord_WOW::DetailledCheckPlayer(ValueMap payload){
-		if(MessageArgs.GetCount() == 1){
-		Value v1 =ResolveType2(MessageArgs[0]);			
-		if(v1.GetTypeName().IsEqual("String")){
-			String name = ToLower(v1.ToString());
-			for(WowPlayer& pl : AllWowPlayers){
-				if(pl.GetPlayerName().IsEqual(name)){
-					String motif="";
-					for(String& s : pl.GetMotifs()){
-						motif << s << "\n";	
-					}
-					BotPtr->CreateMessage(ChannelLastMessage,"Le joueur " + pl.GetPlayerName() + " c'est fait report " + AsString( pl.GetMotifs().GetCount()) +" fois. Voici les motifs : \n" +motif );
-					return;		
-				}
+	String name="";
+	if(MessageArgs.Find("name") != -1 &&  MessageArgs.Get("name").GetTypeName().IsEqual("String")) name = MessageArgs.Get("name").ToString();
+	if(name.GetCount()>0){
+		name= ToLower(name);
+		for(WowPlayer& pl : AllWowPlayers){
+			if(pl.GetPlayerName().IsEqual(name)){
+				BotPtr->CreateMessage(ChannelLastMessage,"Le joueur " + pl.GetPlayerName() + " c'est fait report " + AsString( pl.GetMotifs().GetCount()) +" fois. Voici les motifs : \n" +motif );
+				return;		
 			}
-			BotPtr->CreateMessage(ChannelLastMessage,"Ce joueur n'est pas un cancer" );
-			return;
-		}else{
-			BotPtr->CreateMessage(ChannelLastMessage,"Erreurs d'arguments" );	
 		}
+		BotPtr->CreateMessage(ChannelLastMessage,"Ce joueur n'est pas un cancer" );
+		return;
 	}else{
-		BotPtr->CreateMessage(ChannelLastMessage,"Erreurs d'arguments" );	
+		BotPtr->CreateMessage(ChannelLastMessage,"Donne moi un nom !  Comme ça  : !bl CheckD(Name:<@!" + AuthorId +">)");	
 	}
 }
-
-
 
 void Discord_WOW::prepareOrLoadBDD(){
 	bddLoaded =false;
