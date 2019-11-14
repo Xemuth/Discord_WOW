@@ -157,7 +157,11 @@ void Discord_WOW::DetailledCheckPlayer(ValueMap payload){
 		name= ToLower(name);
 		for(WowPlayer& pl : AllWowPlayers){
 			if(pl.GetPlayerName().IsEqual(name)){
-				BotPtr->CreateMessage(ChannelLastMessage,"Le joueur " + pl.GetPlayerName() + " c'est fait report " + AsString( pl.GetMotifs().GetCount()) +" fois. Voici les motifs : \n" +motif );
+				String motif="";
+				for(String& s : pl.GetMotifs()){
+					motif << s << "\n";	
+				}
+				BotPtr->CreateMessage(ChannelLastMessage,"Le joueur " + pl.GetPlayerName() + " c'est fait report " + AsString( pl.GetMotifs().GetCount()) +" fois. Voici les motifs : \n" + motif );
 				return;		
 			}
 		}
