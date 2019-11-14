@@ -12,22 +12,22 @@ using namespace Upp;
 
 class Discord_WOW: public DiscordModule{
 	private:
-		Sqlite3Session sqlite3; //DataBase
-		bool bddLoaded =false;
-		
-		
 		void PrepareEvent();
+		//Commands
+		void AddPlayer(ValueMap& payload);
+		void CheckPlayer(ValueMap& payload);
+		void DetailledCheckPlayer(ValueMap& payload);
+		void RemovePlayer(ValueMap& payload);
+		void Help(ValueMap& payload);
+		virtual String Credit(ValueMap& payload,bool sendCredit = true);
+		//**************
+		
 		void prepareOrLoadBDD();
 		void LoadMemoryCrud();
 		
-		
-		
 		Vector<WowPlayer> AllWowPlayers;
-
-		void AddPlayer(ValueMap payload);
-		void CheckPlayer(ValueMap payload);
-		void DetailledCheckPlayer(ValueMap payload);
-		void RemovePlayer(ValueMap payload);
+		Sqlite3Session sqlite3; //DataBase
+		bool bddLoaded =false;
 
 		bool CheckRole(ValueMap checkRole,Vector<String>& roleToCheck);
 		Vector<String> AllRoleAllowed{
@@ -41,8 +41,7 @@ class Discord_WOW: public DiscordModule{
 	
 	public:
 		
-		void Help(ValueMap payload);
-		virtual String Credit(ValueMap json,bool sendCredit = true);
+	
 		
 		Discord_WOW(Upp::String _name,Upp::String _prefix);
 		void EventsMessageCreated(ValueMap payload);

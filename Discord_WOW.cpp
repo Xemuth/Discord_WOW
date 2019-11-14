@@ -4,13 +4,13 @@
 #include <Sql/sch_source.h>
 
 void Discord_WOW::PrepareEvent(){
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("add"))AddPlayer(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("delete"))RemovePlayer(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("check"))CheckPlayer(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(NameOfFunction.IsEqual("checkd"))DetailledCheckPlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("add"))AddPlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("delete"))RemovePlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("check"))CheckPlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("checkd"))DetailledCheckPlayer(e);});
 }
 	
-void Discord_WOW::Help(ValueMap payload){
+void Discord_WOW::Help(ValueMap& payload){
 	Upp::String message;
 	
 	message = "```\n";
@@ -25,7 +25,7 @@ void Discord_WOW::Help(ValueMap payload){
 	
 	BotPtr->CreateMessage(this->ChannelLastMessage, message);
 }
-String Discord_WOW::Credit(ValueMap json,bool sendCredit){
+String Discord_WOW::Credit(ValueMap& json,bool sendCredit){
 	String credit =  "----World of Warcraft SmartUppBot Module have been made By Clément Hamon---\n";
 	credit << "-----------https://github.com/Xemuth-----------\n";
 	credit << "Wow module is used to save all scumbag over a database and check for a player if he is clear before inviting him.\n";
@@ -59,7 +59,7 @@ bool Discord_WOW::CheckRole(ValueMap checkRole,Vector<String>& roleToCheck){
 	return false;
 }
 
-void Discord_WOW::AddPlayer(ValueMap payload){
+void Discord_WOW::AddPlayer(ValueMap& payload){
 	if(CheckRole(payload, AllRoleAllowed)){
 		String name="";
 		String motif="";
@@ -103,7 +103,7 @@ void Discord_WOW::AddPlayer(ValueMap payload){
 	}
 }
 
-void Discord_WOW::RemovePlayer(ValueMap payload){
+void Discord_WOW::RemovePlayer(ValueMap& payload){
 	if(CheckRole(payload, AllRoleAdmin)){
 		String name="";
 		if(MessageArgs.Find("name") != -1 &&  MessageArgs.Get("name").GetTypeName().IsEqual("String")) name = MessageArgs.Get("name").ToString();
@@ -133,7 +133,7 @@ void Discord_WOW::RemovePlayer(ValueMap payload){
 	}
 }
 
-void Discord_WOW::CheckPlayer(ValueMap payload){	
+void Discord_WOW::CheckPlayer(ValueMap& payload){	
 	String name="";
 	if(MessageArgs.Find("name") != -1 &&  MessageArgs.Get("name").GetTypeName().IsEqual("String")) name = MessageArgs.Get("name").ToString();
 	if(name.GetCount()>0){
@@ -150,7 +150,7 @@ void Discord_WOW::CheckPlayer(ValueMap payload){
 		BotPtr->CreateMessage(ChannelLastMessage,"Donne moi un nom !  Comme ça  : !bl Check(Name:<@!" + AuthorId +">)");	
 	}
 }
-void Discord_WOW::DetailledCheckPlayer(ValueMap payload){
+void Discord_WOW::DetailledCheckPlayer(ValueMap& payload){
 	String name="";
 	if(MessageArgs.Find("name") != -1 &&  MessageArgs.Get("name").GetTypeName().IsEqual("String")) name = MessageArgs.Get("name").ToString();
 	if(name.GetCount()>0){
