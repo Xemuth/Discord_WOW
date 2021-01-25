@@ -8,6 +8,7 @@ void Discord_WOW::PrepareEvent(){
 	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("delete"))RemovePlayer(e);});
 	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("check"))CheckPlayer(e);});
 	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("checkd"))DetailledCheckPlayer(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(NameOfFunction.IsEqual("hello"))HelloWorld(e);});
 }
 	
 void Discord_WOW::Help(ValueMap& payload){
@@ -34,7 +35,12 @@ String Discord_WOW::Credit(ValueMap& json,bool sendCredit){
 	return credit;
 }
 
-Discord_WOW::Discord_WOW(Upp::String _name,Upp::String _prefix){
+void Discord_WOW::HelloWorld(ValueMap& payload){
+	String hello =  "Wow ! ça faisait longtemps !";
+	BotPtr->CreateMessage(ChannelLastMessage,hello);
+}
+
+Discord_WOW::Discord_WOW(Upp::String _name,const Vector<String>& _prefix){
 	name = _name;
 	AddPrefix(_prefix);
 	

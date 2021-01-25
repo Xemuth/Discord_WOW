@@ -19,6 +19,9 @@ class Discord_WOW: public DiscordModule{
 		void DetailledCheckPlayer(ValueMap& payload);
 		void RemovePlayer(ValueMap& payload);
 		void Help(ValueMap& payload);
+		
+		void HelloWorld(ValueMap& payload);
+		
 		virtual String Credit(ValueMap& payload,bool sendCredit = true);
 		//**************
 		
@@ -43,7 +46,7 @@ class Discord_WOW: public DiscordModule{
 		
 	
 		
-		Discord_WOW(Upp::String _name,Upp::String _prefix);
+		Discord_WOW(Upp::String _name,const Vector<String>& _prefix);
 		void EventsMessageCreated(ValueMap payload);
 };
 #endif
